@@ -1,0 +1,1523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="theme-color" content="#000000"/>
+  <title>Method. Performance Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body,#root{height:100%}
+    body{background:#000;color:#e8e8e8;font-family:"DM Sans","Segoe UI",sans-serif;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+    input,textarea,button,select{font-family:inherit}
+    input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+    input[type=number]{-moz-appearance:textfield}
+    ::-webkit-scrollbar{width:4px;height:4px}
+    ::-webkit-scrollbar-track{background:#111}
+    ::-webkit-scrollbar-thumb{background:#2d6a4f;border-radius:2px}
+    *{-webkit-font-smoothing:antialiased}
+    [draggable]{-webkit-user-drag:element}
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <div id="loader" style="position:fixed;inset:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:16px">
+    <svg width="64" height="64" viewBox="0 0 100 100"><rect width="100" height="100" rx="14" fill="#111"/><rect x="38" y="8" width="24" height="84" fill="white"/><rect x="8" y="38" width="84" height="24" fill="white"/><rect x="38" y="38" width="10" height="10" fill="#111"/><rect x="52" y="38" width="10" height="10" fill="#111"/><rect x="38" y="52" width="10" height="10" fill="#111"/><rect x="52" y="52" width="10" height="10" fill="#111"/></svg>
+    <div style="color:#2d6a4f;font-family:sans-serif;font-size:13px;letter-spacing:0.12em;font-weight:700">LOADING...</div>
+  </div>
+  <script>
+    window.onerror=function(msg){var el=document.getElementById("loader");if(el)el.innerHTML='<div style="color:#e05252;font-family:sans-serif;padding:30px;text-align:center;max-width:320px"><div style="font-size:28px;margin-bottom:12px">⚠</div><div style="font-weight:700;margin-bottom:8px">App failed to load</div><div style="font-size:12px;color:#888;word-break:break-word">'+msg+'</div></div>';};
+  </script>
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <script type="text/babel" data-presets="react,env">
+
+// ─── BRAND TOKENS ─────────────────────────────────────────────────────────────
+const LOGO_B64 = "iVBORw0KGgoAAAANSUhEUgAAADYAAAA0CAYAAADBjcvWAAACnElEQVRoge2aT0sqURjGfycSwowg/xAtNAlqa4voC7TMnYsJXPYBDD9BC9u3VKNFJGq7oFWI36BciS20dYq4EScwcu7icr1Xx3th5s4ZUc4PZvPOcB6emfc8zLwqIpGIwRKyKlvg4OCAo6OjidrLywuNRkOqrnRjx8fHXF5eIoQAwDAMrq6upBtbkbr6HFHG7PKrBd1GujHDmE/oqlZcNJQxu6jwcBjViouGMrZoSDf29fUlW2Im0o31ej3ZEjORbuz9/X0uke+KsW63K1vGhHRj39/fPD8/y5Yx4UoqFotFPj8/3ZAaY5p5rK2tsb6+bnmh0WjEYDBgOByaztXrdZ6enkgkEgAEg0ECgYCl9Q3D+Ot7p67r6Lo+URPT47dkMkkqlbIkCr+NtVotqtUqlUqFTqczPr+9vU2xWCQajTIcDun3+5bW/5exbDZLLpebqM18Ylbv5p9Eo1FOTk5IpVLc3d1xe3uLrut8fHyQTqfJ5/P4/X78fr9tjWm8Xq+pJm2PhUIh0uk0hUKBnZ0dAF5fXzk/P6fdbsuSHSM1PIQQHB4eUiqV2N3dBaBWqxGPx3l8fJy5H51ipjHDMBw9wuEw19fXbG5uAtDpdLi4uCCRSHB/f0+r1ULXdUajkW0N002dDo9AIDBuHSfQNI2zszMAbm5uyGQypmu8Xi9bW1tsbGzg8Xgsa7TbbVN7m8Kj2+06+qYQi8WAn22paRrlcplmszlxzay4/l9c/Wzx+XxomuaKlqvGhBCcnp6ysiJf1vUPzVAoxN7ennQd140JIdjf35euM5fRQDAYlK4xF2N2It0qapizaChji4YyZhf1M5LDqFZcNJQxu6jwcJilbUXpf+trNps8PDxM1N7e3mTLmqdUy8LqvDa3bH4AkWM5Y5sAiBMAAAAASUVORK5CYII=";
+
+const C = {
+  bg: "#000000",
+  surface: "#111111",
+  card: "#141414",
+  border: "#2a2a2a",
+  borderDark: "#333333",
+  accent: "#2d6a4f",
+  accentLight: "#52b788",
+  accentBg: "#0d2b1f",
+  charcoal: "#000000",
+  dark: "#1a1a1a",
+  mid: "#888888",
+  muted: "#666666",
+  mutedLight: "#444444",
+  text: "#e8e8e8",
+  heading: "#ffffff",
+  red: "#e05252",
+  yellow: "#d4a017",
+  green: "#2d6a4f",
+};
+
+
+// ─── PERSISTENCE HOOK ─────────────────────────────────────────────────────────
+function usePersist(key, initial) {
+  const [value, setValue] = React.useState(() => {
+    try { const s = localStorage.getItem(key); return s !== null ? JSON.parse(s) : initial; }
+    catch(e) { return initial; }
+  });
+  React.useEffect(() => {
+    try { localStorage.setItem(key, JSON.stringify(value)); } catch(e) {}
+  }, [key, value]);
+  return [value, setValue];
+}
+
+// ─── METHOD LOGO MARK ────────────────────────────────────────────────────────
+// Exact logo: black rounded square, white plus cross, square notches at the
+// 4 inner corners where the arms meet. Nothing more.
+function MethodMark({ size = 40 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100" height="100" rx="14" fill="#000000" />
+      {/* Vertical arm */}
+      <rect x="38" y="8" width="24" height="84" fill="white" />
+      {/* Horizontal arm */}
+      <rect x="8" y="38" width="84" height="24" fill="white" />
+      {/* Square notch at each of the 4 inner corners */}
+      <rect x="38" y="38" width="7" height="7" fill="#000000" />
+      <rect x="55" y="38" width="7" height="7" fill="#000000" />
+      <rect x="38" y="55" width="7" height="7" fill="#000000" />
+      <rect x="55" y="55" width="7" height="7" fill="#000000" />
+    </svg>
+  );
+}
+
+// ─── COVER MARK — large centred logo ─────────────────────────────────────────
+function Bullseye({ size = 180 }) {
+  return <MethodMark size={size} />;
+}
+
+// ─── PATIENT / CLINICIAN STATE (editable inline) ─────────────────────────────
+function EditableField({ value, onChange, placeholder, style }) {
+  return (
+    <input
+      value={value}
+      onChange={e => onChange(e.target.value)}
+      placeholder={placeholder}
+      style={{
+        background: "transparent", border: "none", borderBottom: `1px solid ${C.borderDark}`,
+        outline: "none", color: "inherit", fontSize: "inherit", fontWeight: "inherit",
+        fontFamily: "inherit", textAlign: "inherit", width: "100%", ...style
+      }}
+    />
+  );
+}
+
+// ─── SHARED UI ────────────────────────────────────────────────────────────────
+function Card({ children, style }) {
+  return (
+    <div style={{
+      background: C.card, border: `1px solid ${C.border}`,
+      borderRadius: 10, padding: "14px 16px", ...style
+    }}>
+      {children}
+    </div>
+  );
+}
+
+function SectionTitle({ children }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+      <div style={{ width: 3, height: 18, background: C.accent, borderRadius: 2 }} />
+      <span style={{
+        fontSize: 11, fontWeight: 800, color: C.mid,
+        letterSpacing: "0.12em", textTransform: "uppercase", fontFamily: "monospace"
+      }}>
+        {children}
+      </span>
+    </div>
+  );
+}
+
+// ─── COVER PAGE ───────────────────────────────────────────────────────────────
+function CoverPage({ company, patient, setPatient, clinician, setClinician }) {
+  return (
+    <div style={{
+      minHeight: "82vh", display: "flex", flexDirection: "column",
+      justifyContent: "space-between", padding: "52px 44px 40px", position: "relative"
+    }}>
+      {/* Subtle grid background */}
+      <svg style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", opacity: 0.035, pointerEvents: "none" }}>
+        <defs>
+          <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+            <path d="M 48 0 L 0 0 0 48" fill="none" stroke={C.charcoal} strokeWidth="1" />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#grid)" />
+      </svg>
+
+      {/* Centre: Logo image + branding */}
+      <div style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 28 }}>
+        {/* Method mark — 4 arms with rounded corners, centre gap, diagonal slash */}
+        <svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <rect width="200" height="200" rx="34" fill="#111111" />
+
+          {/* TOP arm */}
+          <path d="M 94,18 Q 86,18 86,26 L 86,96 Q 86,104 94,104 L 106,104 Q 114,104 114,96 L 114,26 Q 114,18 106,18 Z" fill="white" />
+          {/* BOTTOM arm */}
+          <path d="M 94,96 Q 86,96 86,104 L 86,174 Q 86,182 94,182 L 106,182 Q 114,182 114,174 L 114,104 Q 114,96 106,96 Z" fill="white" />
+          {/* LEFT arm */}
+          <path d="M 18,94 Q 18,86 26,86 L 96,86 Q 104,86 104,94 L 104,106 Q 104,114 96,114 L 26,114 Q 18,114 18,106 Z" fill="white" />
+          {/* RIGHT arm */}
+          <path d="M 104,94 Q 104,86 112,86 L 174,86 Q 182,86 182,94 L 182,106 Q 182,114 174,114 L 112,114 Q 104,114 104,106 Z" fill="white" />
+
+          {/* Diagonal slash — thin line top-left to bottom-right, cuts through the whole mark */}
+          <line x1="62" y1="62" x2="138" y2="138" stroke="#111111" strokeWidth="7" strokeLinecap="round" />
+        </svg>
+        <div>
+          <div style={{ fontSize: 34, fontWeight: 900, color: C.heading, letterSpacing: "-0.03em", lineHeight: 1 }}>Method</div>
+          <div style={{ fontSize: 13, color: C.mid, letterSpacing: "0.28em", textTransform: "uppercase", marginTop: 10 }}>Performance & Rehab</div>
+          <div style={{ width: 40, height: 3, background: C.accent, borderRadius: 2, margin: "14px auto 0" }} />
+        </div>
+        <div style={{
+          border: `1px solid ${C.border}`, borderRadius: 12, padding: "22px 48px",
+          background: C.surface, marginTop: 4
+        }}>
+          <div style={{ fontSize: 11, color: C.muted, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 8 }}>Patient</div>
+          <div style={{ fontSize: 26, fontWeight: 800, color: C.heading, minWidth: 200 }}>
+            <EditableField value={patient} onChange={setPatient} placeholder="Patient Name" style={{ fontSize: 26, fontWeight: 800, textAlign: "center" }} />
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom right: clinician */}
+      <div style={{ textAlign: "right" }}>
+        <div style={{ fontSize: 11, color: C.muted, marginBottom: 4, letterSpacing: "0.1em", textTransform: "uppercase" }}>Prepared by</div>
+        <div style={{ fontSize: 16, fontWeight: 700, color: C.heading, minWidth: 160, display: "inline-block" }}>
+          <EditableField value={clinician} onChange={setClinician} placeholder="Clinician Name" style={{ fontSize: 16, fontWeight: 700, textAlign: "right" }} />
+        </div>
+        <div style={{ fontSize: 12, color: C.muted, marginTop: 4 }}>
+          {new Date().toLocaleDateString("en-AU", { year: "numeric", month: "long", day: "numeric" })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+// ─── EXERCISE LIBRARY ─────────────────────────────────────────────────────────
+const EXERCISE_LIBRARY = {
+  "Running & Sprint Mechanics": [
+    {name:"A-March",yt:"https://www.youtube.com/results?search_query=A+march+running+drill"},
+    {name:"A-Skip",yt:"https://www.youtube.com/results?search_query=A+skip+running+drill"},
+    {name:"B-Skip",yt:"https://www.youtube.com/results?search_query=B+skip+running+drill"},
+    {name:"High Knees",yt:"https://www.youtube.com/results?search_query=high+knees+running+drill"},
+    {name:"Butt Kicks",yt:"https://www.youtube.com/results?search_query=butt+kicks+running+drill"},
+    {name:"Ankle Cycling",yt:"https://www.youtube.com/results?search_query=ankle+cycling+sprint+mechanics"},
+    {name:"Wall Drive (Sprint Position ISO)",yt:"https://www.youtube.com/results?search_query=wall+drive+sprint+isometric"},
+    {name:"Standing Sprint ISO (45° lean)",yt:"https://www.youtube.com/results?search_query=sprint+position+isometric+wall"},
+    {name:"Run-Specific Hip Flexor ISO",yt:"https://www.youtube.com/results?search_query=hip+flexor+isometric+run+specific"},
+    {name:"Single Leg Run Position Hold",yt:"https://www.youtube.com/results?search_query=single+leg+run+position+hold"},
+    {name:"Resisted Sprint",yt:"https://www.youtube.com/results?search_query=resisted+sprint+sled"},
+    {name:"Flying Sprint",yt:"https://www.youtube.com/results?search_query=flying+sprint+drill"},
+    {name:"Wicket Runs",yt:"https://www.youtube.com/results?search_query=wicket+runs+sprint+drill"},
+  ],
+  "Squat Patterns": [
+    {name:"Back Squat",yt:"https://www.youtube.com/results?search_query=back+squat+technique"},
+    {name:"Front Squat",yt:"https://www.youtube.com/results?search_query=front+squat+technique"},
+    {name:"Goblet Squat",yt:"https://www.youtube.com/results?search_query=goblet+squat"},
+    {name:"Heel-Elevated Squat",yt:"https://www.youtube.com/results?search_query=heel+elevated+squat"},
+    {name:"Trap Bar Deadlift",yt:"https://www.youtube.com/results?search_query=trap+bar+deadlift+technique"},
+    {name:"Paused Squat",yt:"https://www.youtube.com/results?search_query=paused+squat"},
+    {name:"Box Squat",yt:"https://www.youtube.com/results?search_query=box+squat+technique"},
+    {name:"Zercher Squat",yt:"https://www.youtube.com/results?search_query=zercher+squat"},
+    {name:"Safety Bar Squat",yt:"https://www.youtube.com/results?search_query=safety+bar+squat"},
+    {name:"Split Squat ISO (midfoot)",yt:"https://www.youtube.com/results?search_query=split+squat+isometric+midfoot"},
+    {name:"Split Squat ISO (forefoot bias)",yt:"https://www.youtube.com/results?search_query=split+squat+isometric+forefoot"},
+    {name:"Squat ISO (various angles)",yt:"https://www.youtube.com/results?search_query=squat+isometric+hold"},
+    {name:"Wall Sit ISO",yt:"https://www.youtube.com/results?search_query=wall+sit+isometric"},
+  ],
+  "Hinge Movements": [
+    {name:"Romanian Deadlift (RDL)",yt:"https://www.youtube.com/results?search_query=romanian+deadlift+technique"},
+    {name:"Conventional Deadlift",yt:"https://www.youtube.com/results?search_query=conventional+deadlift+technique"},
+    {name:"Sumo Deadlift",yt:"https://www.youtube.com/results?search_query=sumo+deadlift+technique"},
+    {name:"Single Leg RDL",yt:"https://www.youtube.com/results?search_query=single+leg+romanian+deadlift"},
+    {name:"Good Morning",yt:"https://www.youtube.com/results?search_query=good+morning+exercise"},
+    {name:"45° Back Extension",yt:"https://www.youtube.com/results?search_query=45+degree+back+extension"},
+    {name:"Nordic Curl",yt:"https://www.youtube.com/results?search_query=nordic+curl+technique"},
+    {name:"Hip Hinge ISO (wall)",yt:"https://www.youtube.com/results?search_query=hip+hinge+isometric"},
+    {name:"Hamstring ISO Prone",yt:"https://www.youtube.com/results?search_query=hamstring+isometric+prone"},
+    {name:"Hamstring ISO (90° knee)",yt:"https://www.youtube.com/results?search_query=hamstring+isometric+90+degrees"},
+    {name:"Glute Ham Raise",yt:"https://www.youtube.com/results?search_query=glute+ham+raise"},
+  ],
+  "Single Leg Movements": [
+    {name:"Bulgarian Split Squat (RFESS)",yt:"https://www.youtube.com/results?search_query=bulgarian+split+squat+RFESS"},
+    {name:"Step Up",yt:"https://www.youtube.com/results?search_query=step+up+exercise"},
+    {name:"Lateral Step Up",yt:"https://www.youtube.com/results?search_query=lateral+step+up"},
+    {name:"Reverse Lunge",yt:"https://www.youtube.com/results?search_query=reverse+lunge"},
+    {name:"Forward Lunge",yt:"https://www.youtube.com/results?search_query=forward+lunge"},
+    {name:"Single Leg Press",yt:"https://www.youtube.com/results?search_query=single+leg+press"},
+    {name:"Single Leg Squat (Pistol)",yt:"https://www.youtube.com/results?search_query=pistol+squat+progression"},
+    {name:"Skater Squat",yt:"https://www.youtube.com/results?search_query=skater+squat"},
+    {name:"Single Leg Calf Raise",yt:"https://www.youtube.com/results?search_query=single+leg+calf+raise"},
+    {name:"Single Leg Hip Thrust",yt:"https://www.youtube.com/results?search_query=single+leg+hip+thrust"},
+    {name:"Single Leg RDL",yt:"https://www.youtube.com/results?search_query=single+leg+RDL"},
+    {name:"Split Squat ISO",yt:"https://www.youtube.com/results?search_query=split+squat+isometric"},
+    {name:"Single Leg ISO (knee angle)",yt:"https://www.youtube.com/results?search_query=single+leg+isometric+hold"},
+  ],
+  "Plyometric Prep & Landing": [
+    {name:"Drop & Stick (bilateral)",yt:"https://www.youtube.com/results?search_query=drop+and+stick+landing+drill"},
+    {name:"Drop & Stick (single leg)",yt:"https://www.youtube.com/results?search_query=single+leg+drop+and+stick"},
+    {name:"Snap Down",yt:"https://www.youtube.com/results?search_query=snap+down+drill+plyometric"},
+    {name:"Snap Down (lateral)",yt:"https://www.youtube.com/results?search_query=lateral+snap+down+drill"},
+    {name:"Snap Down (rotational)",yt:"https://www.youtube.com/results?search_query=rotational+snap+down"},
+    {name:"Bilateral Jump & Stick",yt:"https://www.youtube.com/results?search_query=jump+and+stick+landing"},
+    {name:"Broad Jump & Stick",yt:"https://www.youtube.com/results?search_query=broad+jump+and+stick+landing"},
+    {name:"Lateral Bound & Stick",yt:"https://www.youtube.com/results?search_query=lateral+bound+and+stick"},
+    {name:"Drop Jump",yt:"https://www.youtube.com/results?search_query=drop+jump+technique"},
+    {name:"Pogo Hops (bilateral)",yt:"https://www.youtube.com/results?search_query=pogo+hops+bilateral"},
+    {name:"Pogo Hops (single leg)",yt:"https://www.youtube.com/results?search_query=single+leg+pogo+hops"},
+    {name:"Ankle Stiffness Drills",yt:"https://www.youtube.com/results?search_query=ankle+stiffness+plyometric+drill"},
+    {name:"Countermovement Jump (CMJ)",yt:"https://www.youtube.com/results?search_query=countermovement+jump+technique"},
+    {name:"Box Jump",yt:"https://www.youtube.com/results?search_query=box+jump+technique"},
+    {name:"Depth Jump",yt:"https://www.youtube.com/results?search_query=depth+jump+plyometric"},
+  ],
+  "Hip & Glute": [
+    {name:"Hip Thrust",yt:"https://www.youtube.com/results?search_query=hip+thrust+barbell"},
+    {name:"Glute Bridge",yt:"https://www.youtube.com/results?search_query=glute+bridge"},
+    {name:"Banded Clamshell",yt:"https://www.youtube.com/results?search_query=clamshell+exercise+band"},
+    {name:"Hip Abduction (cable/band)",yt:"https://www.youtube.com/results?search_query=hip+abduction+exercise"},
+    {name:"Copenhagen Plank",yt:"https://www.youtube.com/results?search_query=copenhagen+plank"},
+    {name:"Hip Adduction ISO",yt:"https://www.youtube.com/results?search_query=hip+adduction+isometric"},
+    {name:"Hip Abduction ISO",yt:"https://www.youtube.com/results?search_query=hip+abduction+isometric"},
+    {name:"Hip Flexion ISO (90°)",yt:"https://www.youtube.com/results?search_query=hip+flexion+isometric"},
+    {name:"Hip Extension ISO",yt:"https://www.youtube.com/results?search_query=hip+extension+isometric"},
+    {name:"Fire Hydrant",yt:"https://www.youtube.com/results?search_query=fire+hydrant+exercise"},
+    {name:"Lateral Band Walk",yt:"https://www.youtube.com/results?search_query=lateral+band+walk"},
+  ],
+  "Calf & Ankle": [
+    {name:"Double Leg Calf Raise",yt:"https://www.youtube.com/results?search_query=double+leg+calf+raise"},
+    {name:"Single Leg Calf Raise",yt:"https://www.youtube.com/results?search_query=single+leg+calf+raise"},
+    {name:"Seated Calf Raise",yt:"https://www.youtube.com/results?search_query=seated+calf+raise+soleus"},
+    {name:"Tibialis Raise",yt:"https://www.youtube.com/results?search_query=tibialis+anterior+raise"},
+    {name:"Ankle Dorsiflexion Rocks",yt:"https://www.youtube.com/results?search_query=ankle+dorsiflexion+mobility"},
+    {name:"Plantarflexion ISO",yt:"https://www.youtube.com/results?search_query=plantarflexion+isometric"},
+    {name:"Dorsiflexion ISO",yt:"https://www.youtube.com/results?search_query=dorsiflexion+isometric"},
+    {name:"Inversion ISO",yt:"https://www.youtube.com/results?search_query=ankle+inversion+isometric"},
+    {name:"Eversion ISO",yt:"https://www.youtube.com/results?search_query=ankle+eversion+isometric"},
+    {name:"Single Leg Calf ISO (mid-range)",yt:"https://www.youtube.com/results?search_query=calf+isometric+mid+range"},
+    {name:"Short Foot Exercise",yt:"https://www.youtube.com/results?search_query=short+foot+exercise"},
+    {name:"1st MTP Extension ISO",yt:"https://www.youtube.com/results?search_query=first+MTP+big+toe+isometric"},
+  ],
+  "Knee": [
+    {name:"Knee Extension (machine)",yt:"https://www.youtube.com/results?search_query=knee+extension+machine"},
+    {name:"Leg Curl (prone)",yt:"https://www.youtube.com/results?search_query=prone+leg+curl+machine"},
+    {name:"Leg Curl (seated)",yt:"https://www.youtube.com/results?search_query=seated+leg+curl+machine"},
+    {name:"Terminal Knee Extension (TKE)",yt:"https://www.youtube.com/results?search_query=terminal+knee+extension+band"},
+    {name:"Knee Extension ISO (60°)",yt:"https://www.youtube.com/results?search_query=knee+extension+isometric+60+degrees"},
+    {name:"Knee Extension ISO (90°)",yt:"https://www.youtube.com/results?search_query=knee+extension+isometric+90+degrees"},
+    {name:"Knee Flexion ISO (90°)",yt:"https://www.youtube.com/results?search_query=knee+flexion+isometric"},
+    {name:"Patella Tendon ISO",yt:"https://www.youtube.com/results?search_query=patellar+tendon+isometric+loading"},
+    {name:"Spanish Squat ISO",yt:"https://www.youtube.com/results?search_query=spanish+squat+isometric"},
+  ],
+  "Upper Body Push": [
+    {name:"Bench Press",yt:"https://www.youtube.com/results?search_query=bench+press+technique"},
+    {name:"Incline Bench Press",yt:"https://www.youtube.com/results?search_query=incline+bench+press"},
+    {name:"Push Up",yt:"https://www.youtube.com/results?search_query=push+up+technique"},
+    {name:"Overhead Press",yt:"https://www.youtube.com/results?search_query=overhead+press+technique"},
+    {name:"Dumbbell Shoulder Press",yt:"https://www.youtube.com/results?search_query=dumbbell+shoulder+press"},
+    {name:"Landmine Press",yt:"https://www.youtube.com/results?search_query=landmine+press"},
+    {name:"Cable Chest Press",yt:"https://www.youtube.com/results?search_query=cable+chest+press"},
+    {name:"Dips",yt:"https://www.youtube.com/results?search_query=dips+exercise+technique"},
+    {name:"Pike Push Up",yt:"https://www.youtube.com/results?search_query=pike+push+up"},
+    {name:"Chest Press ISO (mid-range)",yt:"https://www.youtube.com/results?search_query=chest+press+isometric"},
+    {name:"Shoulder Press ISO",yt:"https://www.youtube.com/results?search_query=shoulder+press+isometric"},
+  ],
+  "Upper Body Pull": [
+    {name:"Pull Up / Chin Up",yt:"https://www.youtube.com/results?search_query=pull+up+technique"},
+    {name:"Barbell Row",yt:"https://www.youtube.com/results?search_query=barbell+row+technique"},
+    {name:"Dumbbell Row",yt:"https://www.youtube.com/results?search_query=dumbbell+row"},
+    {name:"Cable Row",yt:"https://www.youtube.com/results?search_query=cable+seated+row"},
+    {name:"Lat Pulldown",yt:"https://www.youtube.com/results?search_query=lat+pulldown+technique"},
+    {name:"Face Pull",yt:"https://www.youtube.com/results?search_query=face+pull+exercise"},
+    {name:"Band Pull Apart",yt:"https://www.youtube.com/results?search_query=band+pull+apart"},
+    {name:"TRX Row",yt:"https://www.youtube.com/results?search_query=TRX+row"},
+    {name:"Inverted Row",yt:"https://www.youtube.com/results?search_query=inverted+row"},
+    {name:"Pull Up ISO (top)",yt:"https://www.youtube.com/results?search_query=pull+up+isometric+top+position"},
+    {name:"Row ISO (mid-range)",yt:"https://www.youtube.com/results?search_query=row+isometric+hold"},
+  ],
+  "Shoulder": [
+    {name:"Lateral Raise",yt:"https://www.youtube.com/results?search_query=lateral+raise+shoulder"},
+    {name:"Front Raise",yt:"https://www.youtube.com/results?search_query=front+raise+shoulder"},
+    {name:"Rear Delt Fly",yt:"https://www.youtube.com/results?search_query=rear+delt+fly"},
+    {name:"External Rotation (band)",yt:"https://www.youtube.com/results?search_query=shoulder+external+rotation+band"},
+    {name:"Internal Rotation (band)",yt:"https://www.youtube.com/results?search_query=shoulder+internal+rotation+band"},
+    {name:"90/90 ER ISO",yt:"https://www.youtube.com/results?search_query=shoulder+90+90+external+rotation+isometric"},
+    {name:"Side-Lying ER ISO",yt:"https://www.youtube.com/results?search_query=side+lying+external+rotation+isometric"},
+    {name:"Scaption",yt:"https://www.youtube.com/results?search_query=scaption+shoulder+exercise"},
+    {name:"Y-T-W-L (prone)",yt:"https://www.youtube.com/results?search_query=Y+T+W+L+prone+shoulder"},
+    {name:"Serratus Wall Slide",yt:"https://www.youtube.com/results?search_query=serratus+wall+slide"},
+    {name:"Shoulder Abduction ISO",yt:"https://www.youtube.com/results?search_query=shoulder+abduction+isometric"},
+    {name:"Shoulder Flexion ISO",yt:"https://www.youtube.com/results?search_query=shoulder+flexion+isometric"},
+  ],
+  "Elbow & Forearm": [
+    {name:"Bicep Curl",yt:"https://www.youtube.com/results?search_query=bicep+curl+technique"},
+    {name:"Hammer Curl",yt:"https://www.youtube.com/results?search_query=hammer+curl"},
+    {name:"Tricep Pushdown",yt:"https://www.youtube.com/results?search_query=tricep+pushdown"},
+    {name:"Overhead Tricep Extension",yt:"https://www.youtube.com/results?search_query=overhead+tricep+extension"},
+    {name:"Wrist Curl",yt:"https://www.youtube.com/results?search_query=wrist+curl+forearm"},
+    {name:"Reverse Wrist Curl",yt:"https://www.youtube.com/results?search_query=reverse+wrist+curl"},
+    {name:"Bicep Curl ISO (90°)",yt:"https://www.youtube.com/results?search_query=bicep+curl+isometric+90+degrees"},
+    {name:"Tricep ISO (elbow extended)",yt:"https://www.youtube.com/results?search_query=tricep+isometric+extended"},
+    {name:"Pronation ISO",yt:"https://www.youtube.com/results?search_query=forearm+pronation+isometric"},
+    {name:"Supination ISO",yt:"https://www.youtube.com/results?search_query=forearm+supination+isometric"},
+    {name:"Wrist Extension ISO",yt:"https://www.youtube.com/results?search_query=wrist+extension+isometric"},
+  ],
+  "Oscillatory — Lower Body": [
+    {name:"Oscillatory Hip Thrust",yt:"https://www.youtube.com/results?search_query=oscillatory+hip+thrust"},
+    {name:"Oscillatory Split Squat",yt:"https://www.youtube.com/results?search_query=oscillatory+split+squat"},
+    {name:"Oscillatory Calf Raise",yt:"https://www.youtube.com/results?search_query=oscillatory+calf+raise"},
+    {name:"Oscillatory Squat (mid-range)",yt:"https://www.youtube.com/results?search_query=oscillatory+squat+reactive"},
+    {name:"Oscillatory RDL",yt:"https://www.youtube.com/results?search_query=oscillatory+romanian+deadlift"},
+    {name:"Oscillatory Step Up",yt:"https://www.youtube.com/results?search_query=oscillatory+step+up"},
+    {name:"Oscillatory Lunge",yt:"https://www.youtube.com/results?search_query=oscillatory+lunge"},
+  ],
+  "Oscillatory — Upper Body": [
+    {name:"Oscillatory Push Up",yt:"https://www.youtube.com/results?search_query=oscillatory+push+up"},
+    {name:"Oscillatory Bench Press",yt:"https://www.youtube.com/results?search_query=oscillatory+bench+press"},
+    {name:"Oscillatory Shoulder Press",yt:"https://www.youtube.com/results?search_query=oscillatory+shoulder+press"},
+    {name:"Oscillatory Row",yt:"https://www.youtube.com/results?search_query=oscillatory+row"},
+    {name:"Oscillatory Bicep Curl",yt:"https://www.youtube.com/results?search_query=oscillatory+bicep+curl"},
+    {name:"Oscillatory ER (shoulder)",yt:"https://www.youtube.com/results?search_query=oscillatory+external+rotation+shoulder"},
+  ],
+  "Core & Trunk": [
+    {name:"Plank ISO",yt:"https://www.youtube.com/results?search_query=plank+isometric"},
+    {name:"Side Plank ISO",yt:"https://www.youtube.com/results?search_query=side+plank+isometric"},
+    {name:"Dead Bug",yt:"https://www.youtube.com/results?search_query=dead+bug+exercise"},
+    {name:"Pallof Press",yt:"https://www.youtube.com/results?search_query=pallof+press"},
+    {name:"Anti-Rotation ISO",yt:"https://www.youtube.com/results?search_query=anti+rotation+isometric+core"},
+    {name:"Copenhagen Plank",yt:"https://www.youtube.com/results?search_query=copenhagen+plank"},
+    {name:"Suitcase Carry",yt:"https://www.youtube.com/results?search_query=suitcase+carry+core"},
+    {name:"Cable Chop",yt:"https://www.youtube.com/results?search_query=cable+chop+core"},
+    {name:"Ab Wheel Rollout",yt:"https://www.youtube.com/results?search_query=ab+wheel+rollout"},
+  ],
+  "Mobility & Activation": [
+    {name:"90/90 Hip Stretch",yt:"https://www.youtube.com/results?search_query=90+90+hip+stretch"},
+    {name:"Hip Flexor Stretch",yt:"https://www.youtube.com/results?search_query=hip+flexor+stretch"},
+    {name:"World's Greatest Stretch",yt:"https://www.youtube.com/results?search_query=worlds+greatest+stretch"},
+    {name:"Thoracic Rotation",yt:"https://www.youtube.com/results?search_query=thoracic+rotation+mobility"},
+    {name:"Ankle Dorsiflexion Stretch",yt:"https://www.youtube.com/results?search_query=ankle+dorsiflexion+stretch"},
+    {name:"Hamstring Stretch",yt:"https://www.youtube.com/results?search_query=hamstring+stretch"},
+    {name:"Pigeon Pose",yt:"https://www.youtube.com/results?search_query=pigeon+pose+hip+stretch"},
+    {name:"Cat-Cow",yt:"https://www.youtube.com/results?search_query=cat+cow+mobility"},
+    {name:"Band Distraction Hip Flexion",yt:"https://www.youtube.com/results?search_query=band+distraction+hip+flexion"},
+  ],
+};
+
+const ALL_EXERCISES = Object.entries(EXERCISE_LIBRARY).flatMap(([cat, exs]) =>
+  exs.map(e => ({ ...e, cat }))
+);
+
+// ─── EXERCISES TAB ────────────────────────────────────────────────────────────
+function newExercise() {
+  return { id: Date.now() + Math.random(), name: "", sets: "3", reps: "", weight: "", ytLink: "" };
+}
+function newSection(name = "") {
+  return { id: Date.now() + Math.random(), label: name, open: true, exercises: [] };
+}
+
+const WEEK_LABELS = [
+  { label: "Week 1", sub: "Foundation" },
+  { label: "Week 2", sub: "Forefoot" },
+  { label: "Week 3", sub: "Big Toe Load" },
+  { label: "Week 4", sub: "Peak" },
+];
+const WEEK_ACCENT = ["#ffffff", "#aaaaaa", C.accentLight, C.accent];
+
+function WeekView({ sections, setSectionsForWeek, notes, setNotes }) {
+  const [newSectionName, setNewSectionName] = React.useState("");
+  const [showLibrary, setShowLibrary] = React.useState(null); // sid when open
+  const [libSearch, setLibSearch] = React.useState("");
+  const [libCat, setLibCat] = React.useState("All");
+  const [dragState, setDragState] = React.useState(null); // {sid, fromIdx}
+  const [dragOver, setDragOver] = React.useState(null);   // {sid, toIdx}
+
+  const inputBase = { background: C.surface, border: `1px solid ${C.border}`, borderRadius: 5, color: "#ffffff", fontWeight: 700, fontSize: 13, padding: "4px 6px", outline: "none", textAlign: "center" };
+
+  function addSection() {
+    const name = newSectionName.trim() || "New Section";
+    setSectionsForWeek(prev => [...prev, newSection(name)]);
+    setNewSectionName("");
+  }
+  function deleteSection(sid) { setSectionsForWeek(prev => prev.filter(s => s.id !== sid)); }
+  function renameSection(sid, val) { setSectionsForWeek(prev => prev.map(s => s.id === sid ? { ...s, label: val } : s)); }
+  function toggleSection(sid) { setSectionsForWeek(prev => prev.map(s => s.id === sid ? { ...s, open: !s.open } : s)); }
+
+  function addExercise(sid) {
+    setSectionsForWeek(prev => prev.map(s => s.id === sid ? { ...s, exercises: [...s.exercises, newExercise()] } : s));
+  }
+  function addFromLibrary(sid, ex) {
+    const e = { ...newExercise(), name: ex.name, ytLink: ex.yt };
+    setSectionsForWeek(prev => prev.map(s => s.id === sid ? { ...s, exercises: [...s.exercises, e] } : s));
+  }
+  function deleteExercise(sid, eid) {
+    setSectionsForWeek(prev => prev.map(s => s.id === sid ? { ...s, exercises: s.exercises.filter(e => e.id !== eid) } : s));
+  }
+  function updateField(sid, eid, field, val) {
+    setSectionsForWeek(prev => prev.map(s => s.id === sid ? { ...s, exercises: s.exercises.map(e => e.id === eid ? { ...e, [field]: val } : e) } : s));
+  }
+
+  // ── Drag & drop helpers ───────────────────────────────────────────────────
+  function onDragStart(sid, idx) { setDragState({ sid, idx }); }
+  function onDragEnter(sid, idx) { setDragOver({ sid, idx }); }
+  function onDragEnd() {
+    if (dragState && dragOver && dragState.sid === dragOver.sid && dragState.idx !== dragOver.idx) {
+      setSectionsForWeek(prev => prev.map(s => {
+        if (s.id !== dragState.sid) return s;
+        const exs = [...s.exercises];
+        const [moved] = exs.splice(dragState.idx, 1);
+        exs.splice(dragOver.idx, 0, moved);
+        return { ...s, exercises: exs };
+      }));
+    }
+    setDragState(null);
+    setDragOver(null);
+  }
+
+  // ── Library filter ────────────────────────────────────────────────────────
+  const cats = ["All", ...Object.keys(EXERCISE_LIBRARY)];
+  const filtered = ALL_EXERCISES.filter(e => {
+    const catOk = libCat === "All" || e.cat === libCat;
+    const searchOk = !libSearch || e.name.toLowerCase().includes(libSearch.toLowerCase());
+    return catOk && searchOk;
+  });
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+
+      {/* Add section bar */}
+      <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 4 }}>
+        <input value={newSectionName} onChange={e => setNewSectionName(e.target.value)}
+          onKeyDown={e => e.key === "Enter" && addSection()}
+          placeholder="Add section (e.g. Neural Prep, Warm Up, Block A…)"
+          style={{ flex: 1, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 7, color: "#ffffff", fontSize: 13, padding: "8px 14px", outline: "none" }} />
+        <button onClick={addSection}
+          style={{ background: C.accent, color: "#fff", border: "none", borderRadius: 7, padding: "8px 16px", fontSize: 12, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}>
+          + Section
+        </button>
+      </div>
+
+      {sections.length === 0 && (
+        <div style={{ textAlign: "center", padding: "40px 0", color: C.muted, fontSize: 13 }}>
+          No sections yet — add one above to get started.
+        </div>
+      )}
+
+      {sections.map(section => (
+        <div key={section.id} style={{ border: `1px solid ${C.border}`, borderRadius: 10, overflow: "hidden" }}>
+
+          {/* Section header */}
+          <div style={{ display: "flex", alignItems: "center", background: section.open ? C.surface : C.card }}>
+            <div onClick={() => toggleSection(section.id)}
+              style={{ flex: 1, display: "flex", alignItems: "center", gap: 10, padding: "11px 16px", cursor: "pointer", userSelect: "none" }}>
+              <div style={{ width: 3, height: 16, background: C.accent, borderRadius: 2, flexShrink: 0 }} />
+              <input value={section.label} onChange={e => { e.stopPropagation(); renameSection(section.id, e.target.value); }}
+                onClick={e => e.stopPropagation()}
+                style={{ background: "transparent", border: "none", outline: "none", color: C.heading, fontWeight: 800, fontSize: 13, letterSpacing: "0.05em", textTransform: "uppercase", minWidth: 80 }} />
+              <span style={{ fontSize: 11, color: C.muted }}>({section.exercises.length})</span>
+            </div>
+            <span onClick={() => toggleSection(section.id)}
+              style={{ color: C.muted, fontSize: 16, padding: "11px 8px", cursor: "pointer", display: "inline-block", transform: section.open ? "rotate(180deg)" : "rotate(0deg)" }}>▾</span>
+            <button onClick={() => deleteSection(section.id)}
+              style={{ background: "transparent", border: "none", color: C.red, fontSize: 16, padding: "11px 14px", cursor: "pointer", fontWeight: 700 }}>×</button>
+          </div>
+
+          {/* Section body */}
+          {section.open && (
+            <div style={{ padding: "12px 14px", background: C.bg }}>
+
+              {/* Exercise rows */}
+              {section.exercises.length > 0 && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 5, marginBottom: 10 }}>
+                  {section.exercises.map((ex, idx) => {
+                    const isDragging = dragState && dragState.sid === section.id && dragState.idx === idx;
+                    const isOver = dragOver && dragOver.sid === section.id && dragOver.idx === idx;
+                    return (
+                      <div key={ex.id}
+                        draggable
+                        onDragStart={() => onDragStart(section.id, idx)}
+                        onDragEnter={() => onDragEnter(section.id, idx)}
+                        onDragEnd={onDragEnd}
+                        onDragOver={e => e.preventDefault()}
+                        style={{
+                          display: "flex", alignItems: "center", gap: 6,
+                          background: isOver ? C.surface : C.card,
+                          border: `1px solid ${isOver ? C.accent : C.border}`,
+                          borderLeft: `3px solid ${C.accent}`,
+                          borderRadius: 8, padding: "7px 8px",
+                          opacity: isDragging ? 0.4 : 1,
+                          transition: "all 0.1s",
+                          cursor: "grab",
+                        }}>
+                        {/* Drag handle */}
+                        <span style={{ color: C.muted, fontSize: 14, flexShrink: 0, cursor: "grab", padding: "0 2px", userSelect: "none" }}>⠿</span>
+
+                        {/* Name */}
+                        <input value={ex.name} onChange={e => updateField(section.id, ex.id, "name", e.target.value)}
+                          placeholder="Exercise name"
+                          style={{ flex: 2, minWidth: 80, background: "transparent", border: "none", borderBottom: `1px solid ${C.border}`, borderRadius: 0, color: "#fff", fontWeight: 600, fontSize: 13, padding: "2px 4px", outline: "none" }} />
+
+                        {/* Sets */}
+                        <input value={ex.sets} onChange={e => updateField(section.id, ex.id, "sets", e.target.value)}
+                          placeholder="Sets" style={{ ...inputBase, width: 36, fontSize: 12 }} />
+
+                        {/* Reps */}
+                        <input value={ex.reps} onChange={e => updateField(section.id, ex.id, "reps", e.target.value)}
+                          placeholder="Reps" style={{ ...inputBase, width: 52, fontSize: 12 }} />
+
+                        {/* Load */}
+                        <input value={ex.weight} onChange={e => updateField(section.id, ex.id, "weight", e.target.value)}
+                          placeholder="Load" style={{ ...inputBase, width: 52, fontSize: 12, color: C.accent }} />
+
+                        {/* YouTube */}
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, flexShrink: 0 }}>
+                          {ex.ytLink
+                            ? <a href={ex.ytLink} target="_blank" rel="noopener noreferrer"
+                                style={{ background: "#cc0000", color: "#fff", borderRadius: 4, padding: "2px 7px", fontSize: 10, fontWeight: 700, textDecoration: "none" }}>▶</a>
+                            : <input value={ex.ytLink} onChange={e => updateField(section.id, ex.id, "ytLink", e.target.value)}
+                                placeholder="YT URL" style={{ ...inputBase, width: 52, fontSize: 9, color: C.muted }} />
+                          }
+                          {ex.ytLink && (
+                            <input value={ex.ytLink} onChange={e => updateField(section.id, ex.id, "ytLink", e.target.value)}
+                              placeholder="YT URL" style={{ ...inputBase, width: 52, fontSize: 8, color: C.muted }} />
+                          )}
+                        </div>
+
+                        {/* Delete */}
+                        <button onClick={() => deleteExercise(section.id, ex.id)}
+                          style={{ background: "transparent", border: `1px solid ${C.red}`, color: C.red, borderRadius: 4, width: 22, height: 22, cursor: "pointer", fontSize: 12, lineHeight: 1, flexShrink: 0 }}>×</button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Column labels */}
+              {section.exercises.length > 0 && (
+                <div style={{ display:"flex", gap:6, padding:"0 36px 4px 36px", fontSize:9, color:C.muted, letterSpacing:"0.08em", textTransform:"uppercase" }}>
+                  <span style={{flex:2}}>Exercise</span>
+                  <span style={{width:36,textAlign:"center"}}>Sets</span>
+                  <span style={{width:52,textAlign:"center"}}>Reps</span>
+                  <span style={{width:52,textAlign:"center"}}>Load</span>
+                  <span style={{width:52,textAlign:"center"}}>YT</span>
+                  <span style={{width:22}}/>
+                </div>
+              )}
+
+              {/* Add buttons */}
+              <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
+                <button onClick={() => addExercise(section.id)}
+                  style={{ background: C.accent, color: "#fff", border: "none", borderRadius: 6, padding: "6px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+                  + Custom
+                </button>
+                <button onClick={() => { setShowLibrary(section.id); setLibSearch(""); setLibCat("All"); }}
+                  style={{ background: C.surface, color: C.heading, border: `1px solid ${C.border}`, borderRadius: 6, padding: "6px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+                  📚 Library
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
+
+      {/* Week notes */}
+      <Card style={{ marginTop: 8 }}>
+        <SectionTitle>Week Notes</SectionTitle>
+        <textarea value={notes} onChange={e => setNotes(e.target.value)}
+          placeholder="Notes for this week..."
+          style={{ width: "100%", background: "transparent", border: "none", color: C.text, fontSize: 13, resize: "vertical", outline: "none", minHeight: 60 }} />
+      </Card>
+
+      {/* ── Library modal ──────────────────────────────────────────────────── */}
+      {showLibrary && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", zIndex: 50, display: "flex", alignItems: "flex-end" }}
+          onClick={() => setShowLibrary(null)}>
+          <div onClick={e => e.stopPropagation()}
+            style={{ width: "100%", maxHeight: "85vh", background: C.surface, borderRadius: "16px 16px 0 0", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+
+            {/* Modal header */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 18px 12px", borderBottom: `1px solid ${C.border}` }}>
+              <span style={{ fontWeight: 800, fontSize: 15, color: C.heading }}>📚 Exercise Library</span>
+              <button onClick={() => setShowLibrary(null)}
+                style={{ background: "transparent", border: "none", color: C.muted, fontSize: 20, cursor: "pointer", lineHeight: 1 }}>×</button>
+            </div>
+
+            {/* Search */}
+            <div style={{ padding: "10px 14px 6px" }}>
+              <input value={libSearch} onChange={e => setLibSearch(e.target.value)}
+                placeholder="Search exercises…"
+                style={{ width: "100%", background: C.card, border: `1px solid ${C.border}`, borderRadius: 8, color: "#fff", fontSize: 14, padding: "9px 14px", outline: "none" }} />
+            </div>
+
+            {/* Category chips */}
+            <div style={{ display: "flex", gap: 6, overflowX: "auto", padding: "6px 14px 10px", scrollbarWidth: "none" }}>
+              {cats.map(cat => (
+                <button key={cat} onClick={() => setLibCat(cat)}
+                  style={{ background: libCat === cat ? C.accent : C.card, color: libCat === cat ? "#fff" : C.muted, border: `1px solid ${libCat === cat ? C.accent : C.border}`, borderRadius: 20, padding: "4px 12px", fontSize: 11, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}>
+                  {cat}
+                </button>
+              ))}
+            </div>
+
+            {/* Exercise list */}
+            <div style={{ flex: 1, overflowY: "auto", padding: "0 14px 20px" }}>
+              {filtered.length === 0 && (
+                <div style={{ textAlign: "center", padding: "24px 0", color: C.muted, fontSize: 13 }}>No exercises found</div>
+              )}
+              {filtered.map((ex, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0", borderBottom: `1px solid ${C.border}` }}>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: C.heading }}>{ex.name}</div>
+                    <div style={{ fontSize: 10, color: C.muted, marginTop: 2 }}>{ex.cat}</div>
+                  </div>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                    <a href={ex.yt} target="_blank" rel="noopener noreferrer"
+                      style={{ background: "#cc0000", color: "#fff", borderRadius: 4, padding: "3px 8px", fontSize: 10, fontWeight: 700, textDecoration: "none" }}>▶ YT</a>
+                    <button onClick={() => { addFromLibrary(showLibrary, ex); }}
+                      style={{ background: C.accent, color: "#fff", border: "none", borderRadius: 5, padding: "5px 12px", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
+                      + Add
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+
+function ExercisesTab({ weeks, setWeeks, notes, setNotes }) {
+  const [activeWeek, setActiveWeek] = React.useState(0);
+
+  function setSectionsForWeek(wi, updater) {
+    setWeeks(prev => prev.map((w, i) => i === wi ? { ...w, sections: typeof updater === "function" ? updater(w.sections) : updater } : w));
+  }
+  function setNotesForWeek(wi, val) {
+    setWeeks(prev => prev.map((w, i) => i === wi ? { ...w, notes: val } : w));
+  }
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      {/* Program info banner */}
+      <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderLeft: `3px solid ${C.accent}`, borderRadius: 8, padding: "11px 16px" }}>
+        <div style={{ fontSize: 13, fontWeight: 800, color: C.heading, marginBottom: 3 }}>4-Week Lower Limb S&C — Big Toe Load Tolerance</div>
+        <div style={{ fontSize: 11, color: C.muted }}>
+          <span style={{ color: C.accent, fontWeight: 700 }}>Pain:</span> ≤3/10 · No next-day flare · Tempo: 3–1–1 · 2–3 sessions/week · No plyometrics
+        </div>
+      </div>
+
+      {/* Week tabs */}
+      <div style={{ display: "flex", gap: 0, background: C.surface, borderRadius: 10, padding: 4, border: `1px solid ${C.border}` }}>
+        {WEEK_LABELS.map((w, i) => (
+          <button key={i} onClick={() => setActiveWeek(i)}
+            style={{
+              flex: 1, background: activeWeek === i ? WEEK_ACCENT[i] === "#ffffff" ? "#333" : C.accent : "transparent",
+              color: activeWeek === i ? "#ffffff" : C.muted,
+              border: "none", borderRadius: 7, padding: "9px 8px", cursor: "pointer", transition: "all 0.15s",
+              borderBottom: activeWeek === i ? `2px solid ${WEEK_ACCENT[i]}` : "2px solid transparent"
+            }}>
+            <div style={{ fontSize: 12, fontWeight: 800 }}>{w.label}</div>
+            <div style={{ fontSize: 9, opacity: 0.7, marginTop: 1, textTransform: "uppercase", letterSpacing: "0.08em" }}>{w.sub}</div>
+          </button>
+        ))}
+      </div>
+
+      {/* Active week content */}
+      <WeekView
+        sections={weeks[activeWeek]?.sections || []}
+        setSectionsForWeek={updater => setSectionsForWeek(activeWeek, updater)}
+        notes={weeks[activeWeek]?.notes || ""}
+        setNotes={val => setNotesForWeek(activeWeek, val)}
+      />
+    </div>
+  );
+}
+
+// ─── TESTING TAB ──────────────────────────────────────────────────────────────
+// Each test has multiple measures. Each measure has its own column / row.
+// "bilateral" measures show L + R + asymmetry. Others show a single value.
+const testTypes = [
+  {
+    key: "imtp", label: "IMTP — Isometric Mid-Thigh Pull",
+    measures: [
+      { key: "peak_force",   label: "Peak Force",       unit: "N",      bilateral: false, normKey: "imtp_peak"   },
+      { key: "force_200ms",  label: "Force @ 200 ms",   unit: "N",      bilateral: false, normKey: "imtp_200ms"  },
+    ]
+  },
+  {
+    key: "ankle_iso", label: "Ankle ISO — Run Specific",
+    measures: [
+      { key: "peak_force",   label: "Peak Force",       unit: "N",      bilateral: true,  normKey: "ankle_peak"  },
+      { key: "rfd",          label: "RFD (early phase)", unit: "N/s",   bilateral: true,  normKey: "ankle_rfd"   },
+    ]
+  },
+  {
+    key: "drop_jump", label: "Drop Jump (RSI Test)",
+    measures: [
+      { key: "rsi",          label: "RSI",              unit: "",        bilateral: false, normKey: "dj_rsi"      },
+      { key: "contact_time", label: "Contact Time",     unit: "ms",      bilateral: false, normKey: "dj_contact"  },
+    ]
+  },
+  {
+    key: "cmj", label: "CMJ — Countermovement Jump",
+    measures: [
+      { key: "jump_height",  label: "Jump Height",      unit: "cm",      bilateral: false, normKey: "cmj_height"  },
+      { key: "peak_power",   label: "Peak Power",       unit: "W",       bilateral: false, normKey: "cmj_power"   },
+    ]
+  },
+  {
+    key: "slh", label: "Single Leg Hop",
+    measures: [
+      { key: "distance_lsi", label: "Distance (LSI %)", unit: "%",       bilateral: false, normKey: "slh_lsi"     },
+      { key: "land_force",   label: "Peak Landing Force", unit: "N",      bilateral: true, normKey: "slh_land"   },
+    ]
+  },
+  {
+    key: "nordic", label: "Nordic Curl",
+    measures: [
+      { key: "peak_force",   label: "Peak Force",       unit: "N",       bilateral: true,  normKey: "nordic_peak" },
+    ]
+  },
+  {
+    key: "ham_iso", label: "Hamstring ISO — Prone",
+    measures: [
+      { key: "peak_force",   label: "Peak Force",       unit: "N",       bilateral: true,  normKey: "ham_peak"    },
+    ]
+  },
+];
+
+function pct(a, b) {
+  if (!a || !b) return null;
+  return (((b - a) / a) * 100).toFixed(1);
+}
+function asymmetry(l, r) {
+  if (!l || !r) return null;
+  const hi = Math.max(l, r), lo = Math.min(l, r);
+  return (((hi - lo) / hi) * 100).toFixed(1);
+}
+
+function MiniChart({ data, color = C.accent }) {
+  if (!data || data.length < 2) return (
+    <div style={{ height: 64, display: "flex", alignItems: "center", justifyContent: "center", color: C.mutedLight, fontSize: 11 }}>
+      Add ≥2 entries to see graph
+    </div>
+  );
+  const vals = data.map(d => Number(d.value)).filter(Boolean);
+  const min = Math.min(...vals) * 0.93;
+  const max = Math.max(...vals) * 1.07;
+  const W = 200, H = 60;
+  const xStep = W / (vals.length - 1);
+  const yScale = v => H - ((v - min) / (max - min || 1)) * H;
+  const pts = vals.map((v, i) => `${i * xStep},${yScale(v)}`).join(" ");
+  return (
+    <svg width={W} height={H} style={{ overflow: "visible" }}>
+      <polyline points={pts} fill="none" stroke={color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+      {vals.map((v, i) => (
+        <circle key={i} cx={i * xStep} cy={yScale(v)} r={3.5} fill={color} stroke="white" strokeWidth={1} />
+      ))}
+    </svg>
+  );
+}
+
+function TestingTab({ bodyweight, setBodyweight, bwHistory, setBwHistory, rows, setRows }) {
+  // newEntry: { testKey_measureKey: { date, l, r, value } }
+  const [newEntry, setNewEntry] = React.useState(() => {
+    const e = {};
+    testTypes.forEach(t => t.measures.forEach(m => { e[t.key+"_"+m.key] = { date:"", l:"", r:"", value:"" }; }));
+    return e;
+  });
+  const [bwInput, setBwInput] = React.useState(bodyweight || "");
+  const [bwDate, setBwDate] = React.useState("");
+  const [editingBw, setEditingBw] = React.useState(null);
+  const [editingRow, setEditingRow] = React.useState(null);
+
+  function addBwEntry() {
+    if (!bwDate || !bwInput) return;
+    const val = Number(bwInput);
+    setBwHistory(prev => [...prev, { date: bwDate, value: val }]);
+    setBodyweight(val);
+    setBwInput("");
+    setBwDate("");
+  }
+  function deleteBwEntry(i) {
+    setBwHistory(prev => {
+      const next = prev.filter((_, idx) => idx !== i);
+      if (next.length) setBodyweight(next[next.length - 1].value);
+      else setBodyweight(null);
+      return next;
+    });
+  }
+  function saveBwEdit(i) {
+    if (!editingBw) return;
+    setBwHistory(prev => prev.map((r, idx) => idx === i ? { ...r, [editingBw.field]: editingBw.field === "value" ? Number(editingBw.value) : editingBw.value } : r));
+    setBodyweight(bwHistory.map((r, idx) => idx === i ? Number(editingBw.value) : r.value).slice(-1)[0] || bodyweight);
+    setEditingBw(null);
+  }
+
+  function addEntry(compositeKey, bilateral) {
+    const e = newEntry[compositeKey] || { date:"", l:"", r:"", value:"" };
+    if (!e.date) return;
+    const entry = bilateral ? { date: e.date, l: Number(e.l), r: Number(e.r) } : { date: e.date, value: Number(e.value) };
+    setRows(prev => ({ ...prev, [compositeKey]: [...(prev[compositeKey]||[]), entry] }));
+    setNewEntry(prev => ({ ...prev, [compositeKey]: { date: "", l: "", r: "", value: "" } }));
+  }
+  function updateNew(compositeKey, field, val) {
+    setNewEntry(prev => ({
+      ...prev,
+      [compositeKey]: { ...(prev[compositeKey] || { date:"", l:"", r:"", value:"" }), [field]: val }
+    }));
+  }
+  function deleteRow(key, i) {
+    setRows(prev => ({ ...prev, [key]: (prev[key]||[]).filter((_, idx) => idx !== i) }));
+  }
+  function saveRowEdit(key, i) {
+    if (!editingRow) return;
+    setRows(prev => ({
+      ...prev,
+      [key]: (prev[key]||[]).map((r, idx) => {
+        if (idx !== i) return r;
+        const updated = { ...r };
+        const isNum = ["l","r","value"].includes(editingRow.field);
+        updated[editingRow.field] = isNum ? Number(editingRow.value) : editingRow.value;
+        return updated;
+      })
+    }));
+    setEditingRow(null);
+  }
+
+  const inputStyle = { background: C.surface, border: `1px solid ${C.border}`, borderRadius: 6, color: C.text, padding: "5px 8px", fontSize: 12, outline: "none" };
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+
+      {/* ── Bodyweight Card ── */}
+      <Card style={{ borderLeft: `3px solid ${C.accent}` }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16 }}>
+          <div style={{ flex: 1, minWidth: 240 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: C.heading, marginBottom: 2 }}>Body Weight</div>
+            <div style={{ fontSize: 11, color: C.muted, marginBottom: 14 }}>
+              Unit: kg — used to auto-calculate relative scores in Tab 3
+            </div>
+
+            {/* Current BW display */}
+            {bodyweight && (
+              <div style={{ display: "inline-flex", alignItems: "baseline", gap: 6, marginBottom: 14, background: C.surface, borderRadius: 8, padding: "8px 16px", border: `1px solid ${C.border}` }}>
+                <span style={{ fontSize: 28, fontWeight: 900, color: C.heading }}>{bodyweight}</span>
+                <span style={{ fontSize: 13, color: C.muted }}>kg</span>
+              </div>
+            )}
+
+            {/* History table */}
+            {bwHistory.length > 0 && (
+              <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse", marginBottom: 12 }}>
+                <thead>
+                  <tr style={{ borderBottom: `1px solid ${C.border}` }}>
+                    <th style={{ textAlign: "left", padding: "4px 8px", color: C.muted, fontWeight: 600 }}>Date</th>
+                    <th style={{ textAlign: "center", color: C.muted, fontWeight: 600 }}>Weight (kg)</th>
+                    <th style={{ textAlign: "center", color: C.accent, fontWeight: 700 }}>Δ%</th>
+                    <th style={{ width: 60 }} />
+                  </tr>
+                </thead>
+                <tbody>
+                  {bwHistory.map((row, i) => {
+                    const prev = bwHistory[i - 1];
+                    const delta = prev ? pct(prev.value, row.value) : null;
+                    const editingThis = editingBw && editingBw.index === i;
+                    return (
+                      <tr key={i} style={{ borderBottom: `1px solid ${C.border}`, background: editingThis ? C.surface : "transparent" }}>
+                        <td style={{ padding: "4px 8px" }}>
+                          {editingThis && editingBw.field === "date"
+                            ? <input type="date" value={editingBw.value} onChange={e => setEditingBw(p => ({...p, value: e.target.value}))} onBlur={() => saveBwEdit(i)} autoFocus style={{ background: C.card, border: `1px solid ${C.accent}`, borderRadius: 4, color: C.text, padding: "2px 6px", fontSize: 12, outline: "none" }} />
+                            : <span onClick={() => setEditingBw({ index: i, field: "date", value: row.date })} style={{ color: C.text, cursor: "pointer", borderBottom: `1px dashed ${C.border}` }}>{row.date}</span>}
+                        </td>
+                        <td style={{ textAlign: "center" }}>
+                          {editingThis && editingBw.field === "value"
+                            ? <input type="number" value={editingBw.value} onChange={e => setEditingBw(p => ({...p, value: e.target.value}))} onBlur={() => saveBwEdit(i)} autoFocus style={{ width: 60, background: C.card, border: `1px solid ${C.accent}`, borderRadius: 4, color: C.heading, padding: "2px 6px", fontSize: 12, outline: "none", textAlign: "center" }} />
+                            : <span onClick={() => setEditingBw({ index: i, field: "value", value: row.value })} style={{ color: C.heading, fontWeight: 700, cursor: "pointer", borderBottom: `1px dashed ${C.border}` }}>{row.value} kg</span>}
+                        </td>
+                        <td style={{ textAlign: "center", fontWeight: 700, color: delta && Number(delta) >= 0 ? C.accent : C.red }}>
+                          {delta ? `${Number(delta) >= 0 ? "+" : ""}${delta}%` : "—"}
+                        </td>
+                        <td style={{ textAlign: "center" }}>
+                          <button onClick={() => deleteBwEntry(i)} style={{ background: "transparent", border: `1px solid ${C.red}`, color: C.red, borderRadius: 4, width: 22, height: 22, cursor: "pointer", fontSize: 12, lineHeight: 1 }}>×</button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+
+            {/* Add entry */}
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+              <input type="date" value={bwDate} onChange={e => setBwDate(e.target.value)} style={inputStyle} />
+              <input type="number" placeholder="kg" value={bwInput} onChange={e => setBwInput(e.target.value)}
+                style={{ ...inputStyle, width: 70 }} />
+              <button onClick={addBwEntry}
+                style={{ background: C.accent, color: "#fff", border: "none", borderRadius: 6, padding: "5px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+                + Add
+              </button>
+            </div>
+          </div>
+
+          <div style={{ minWidth: 220, paddingLeft: 8 }}>
+            <div style={{ fontSize: 10, color: C.muted, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.1em" }}>Progression</div>
+            <MiniChart data={bwHistory} color={C.accent} />
+          </div>
+        </div>
+      </Card>
+
+      {testTypes.map(t => (
+        <Card key={t.key} style={{ borderLeft: `3px solid ${C.accent}`, marginBottom: 0 }}>
+          <div style={{ fontSize: 14, fontWeight: 800, color: C.heading, marginBottom: 14 }}>{t.label}</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            {t.measures.map(m => {
+              const cKey = t.key + "_" + m.key;
+              const data = (rows && rows[cKey]) || [];
+              const ne = newEntry[cKey] || { date:"", l:"", r:"", value:"" };
+              const chartData = m.bilateral
+                ? data.map(d => ({ date: d.date, value: ((d.l||0)+(d.r||0))/2 }))
+                : data;
+
+              return (
+                <div key={m.key} style={{ background: C.surface, borderRadius: 8, padding: "12px 12px" }}>
+                  {/* Measure header + mini chart */}
+                  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom: 10, gap: 8, flexWrap: "wrap" }}>
+                    <div>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: C.heading }}>{m.label}</span>
+                      {m.unit ? <span style={{ fontSize: 11, color: C.muted, marginLeft: 6 }}>{m.unit}</span> : null}
+                    </div>
+                    <MiniChart data={chartData} color={C.accent} />
+                  </div>
+
+                  {/* History table */}
+                  {data.length > 0 && (
+                    <div style={{ overflowX: "auto", marginBottom: 10 }}>
+                      <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse" }}>
+                        <thead>
+                          <tr style={{ borderBottom: `1px solid ${C.border}` }}>
+                            <th style={{ textAlign:"left", padding:"3px 6px", color:C.muted, fontWeight:600 }}>Date</th>
+                            {m.bilateral ? <>
+                              <th style={{ textAlign:"center", color:C.muted, fontWeight:600, padding:"3px 6px" }}>L</th>
+                              <th style={{ textAlign:"center", color:C.muted, fontWeight:600, padding:"3px 6px" }}>R</th>
+                              <th style={{ textAlign:"center", color:C.yellow, fontWeight:700, padding:"3px 6px" }}>Asym%</th>
+                            </> : <th style={{ textAlign:"center", color:C.muted, fontWeight:600, padding:"3px 6px" }}>Value</th>}
+                            <th style={{ textAlign:"center", color:C.accent, fontWeight:700, padding:"3px 6px" }}>Δ%</th>
+                            <th style={{ width:28 }} />
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {data.map((row, i) => {
+                            const prev = data[i-1];
+                            let delta = null;
+                            if (m.bilateral && prev) delta = pct((prev.l+prev.r)/2, (row.l+row.r)/2);
+                            if (!m.bilateral && prev) delta = pct(prev.value, row.value);
+                            const asym = m.bilateral ? asymmetry(row.l, row.r) : null;
+                            const asymNum = Number(asym);
+                            const isEditing = editingRow && editingRow.key===cKey && editingRow.index===i;
+                            const cellInput = (field, type="text") => (
+                              <input type={type} value={editingRow.value}
+                                onChange={e => setEditingRow(p=>({...p,value:e.target.value}))}
+                                onBlur={() => saveRowEdit(cKey, i)} autoFocus
+                                style={{ width:type==="date"?100:52, background:C.card, border:`1px solid ${C.accent}`, borderRadius:4, color:C.heading, padding:"2px 4px", fontSize:11, outline:"none", textAlign:"center" }} />
+                            );
+                            const cell = (val, field) => isEditing && editingRow.field===field
+                              ? cellInput(field, ["l","r","value"].includes(field)?"number":"date")
+                              : <span onClick={() => setEditingRow({key:cKey,index:i,field,value:String(val)})}
+                                  style={{ cursor:"pointer", borderBottom:`1px dashed ${C.border}`, color:C.text }}>{val}</span>;
+                            return (
+                              <tr key={i} style={{ borderBottom:`1px solid ${C.border}`, background: isEditing ? C.card : "transparent" }}>
+                                <td style={{ padding:"4px 6px" }}>{cell(row.date,"date")}</td>
+                                {m.bilateral ? <>
+                                  <td style={{ textAlign:"center", padding:"4px 4px" }}>{cell(row.l,"l")}</td>
+                                  <td style={{ textAlign:"center", padding:"4px 4px" }}>{cell(row.r,"r")}</td>
+                                  <td style={{ textAlign:"center", fontWeight:700, padding:"4px 4px",
+                                    color: asymNum>15?C.red:asymNum>10?C.yellow:C.accent }}>
+                                    {asym ? `${asym}%` : "—"}
+                                  </td>
+                                </> : <td style={{ textAlign:"center", padding:"4px 4px" }}>{cell(row.value,"value")}</td>}
+                                <td style={{ textAlign:"center", fontWeight:700, padding:"4px 4px",
+                                  color: delta&&Number(delta)>=0?C.accent:C.red }}>
+                                  {delta ? `${Number(delta)>=0?"+":""}${delta}%` : "—"}
+                                </td>
+                                <td style={{ textAlign:"center" }}>
+                                  <button onClick={() => deleteRow(cKey, i)}
+                                    style={{ background:"transparent", border:`1px solid ${C.red}`, color:C.red, borderRadius:4, width:22, height:22, cursor:"pointer", fontSize:12, lineHeight:1 }}>×</button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {/* Add entry row */}
+                  <div style={{ display:"flex", gap:6, flexWrap:"wrap", alignItems:"center" }}>
+                    <input type="date" value={ne.date}
+                      onChange={e => updateNew(cKey,"date",e.target.value)}
+                      style={inputStyle} />
+                    {m.bilateral ? <>
+                      <input type="number" placeholder="L" value={ne.l}
+                        onChange={e => updateNew(cKey,"l",e.target.value)}
+                        style={{ ...inputStyle, width:58 }} />
+                      <input type="number" placeholder="R" value={ne.r}
+                        onChange={e => updateNew(cKey,"r",e.target.value)}
+                        style={{ ...inputStyle, width:58 }} />
+                    </> : (
+                      <input type="number" placeholder="Value" value={ne.value}
+                        onChange={e => updateNew(cKey,"value",e.target.value)}
+                        style={{ ...inputStyle, width:80 }} />
+                    )}
+                    <button onClick={() => addEntry(cKey, m.bilateral)}
+                      style={{ background:C.accent, color:"#fff", border:"none", borderRadius:6, padding:"5px 14px", fontSize:12, fontWeight:700, cursor:"pointer" }}>
+                      + Add
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+// ─── NORMATIVE DATA TAB ───────────────────────────────────────────────────────
+// normKey maps to a measure in testTypes
+const normativeData = [
+  // ── IMTP ──
+  { normKey:"imtp_peak", testKey:"imtp_peak_force",
+    label:"IMTP — Peak Force", unit:"N",
+    why:"Max strength ceiling",
+    bands:[
+      {tier:"Poor",    range:"< 1500 N",            bg:"#2a1010",border:"#e05252",text:"#e05252"},
+      {tier:"Good",    range:"1500 – 2000 N",       bg:"#2a2208",border:"#d4a017",text:"#92400e"},
+      {tier:"Very Good",range:"2000 – 2500 N",      bg:"#0d2b1f",border:"#2d6a4f",text:"#2d6a4f"},
+      {tier:"Elite",   range:"> 2500 N",             bg:"#0a2018",border:"#166534",text:"#166534"},
+    ], bwRelative:false, breaks:[1500,2000,2500],
+    ref:"Haff et al. (2015); McGuigan et al." },
+  { normKey:"imtp_200ms", testKey:"imtp_force_200ms",
+    label:"IMTP — Force @ 200 ms", unit:"N",
+    why:"Sport transfer — acceleration & change of direction",
+    bands:[
+      {tier:"Poor",    range:"< 1000 N",            bg:"#2a1010",border:"#e05252",text:"#e05252"},
+      {tier:"Good",    range:"1000 – 1400 N",       bg:"#2a2208",border:"#d4a017",text:"#92400e"},
+      {tier:"Very Good",range:"1400 – 1800 N",      bg:"#0d2b1f",border:"#2d6a4f",text:"#2d6a4f"},
+      {tier:"Elite",   range:"> 1800 N",             bg:"#0a2018",border:"#166534",text:"#166534"},
+    ], bwRelative:false, breaks:[1000,1400,1800],
+    ref:"Haff et al. (2015)" },
+
+  // ── Ankle ISO ──
+  { normKey:"ankle_peak", testKey:"ankle_iso_peak_force",
+    label:"Ankle ISO — Peak Force", unit:"N",
+    why:"Plantarflexion capacity",
+    bands:[
+      {tier:"Poor",    range:"< 1500 N",            bg:"#2a1010",border:"#e05252",text:"#e05252"},
+      {tier:"Good",    range:"1500 – 2000 N",       bg:"#2a2208",border:"#d4a017",text:"#92400e"},
+      {tier:"Very Good",range:"2000 – 2800 N",      bg:"#0d2b1f",border:"#2d6a4f",text:"#2d6a4f"},
+      {tier:"Elite",   range:"> 2800 N",             bg:"#0a2018",border:"#166534",text:"#166534"},
+    ], bwRelative:false, breaks:[1500,2000,2800],
+    ref:"Silbernagel et al.; Roos et al." },
+  { normKey:"ankle_rfd", testKey:"ankle_iso_rfd",
+    label:"Ankle ISO — RFD (early phase)", unit:"N/s",
+    why:"Push-off quality — the key running metric",
+    bands:[
+      {tier:"Poor",    range:"< 2000 N/s",           bg:"#2a1010",border:"#e05252",text:"#e05252"},
+      {tier:"Good",    range:"2000 – 3500 N/s",      bg:"#2a2208",border:"#d4a017",text:"#92400e"},
+      {tier:"Very Good",range:"3500 – 5000 N/s",     bg:"#0d2b1f",border:"#2d6a4f",text:"#2d6a4f"},
+      {tier:"Elite",   range:"> 5000 N/s",            bg:"#0a2018",border:"#166534",text:"#166534"},
+    ], bwRelative:false, breaks:[2000,3500,5000],
+    ref:"Silbernagel et al." },
+
+  // ── Drop Jump ──
+  { normKey:"dj_rsi", testKey:"drop_jump_rsi",
+    label:"Drop Jump — RSI", unit:"",
+    why:"Overall reactive strength",
+    bands:[
+      {tier:"Poor",    range:"< 1.0",   bg:"#2a1010",border:"#e05252",text:"#e05252"},
+      {tier:"Good",    range:"1.0 – 1.5",bg:"#2a2208",border:"#d4a017",text:"#92400e"},
+      {tier:"Very Good",range:"1.5 – 2.0",bg:"#0d2b1f",border:"#2d6a4f",text:"#2d6a4f"},
+      {tier:"Elite",   range:"> 2.0",    bg:"#0a2018",border:"#166534",text:"#166534"},
+    ], bwRelative:false, breaks:[1.0,1.5,2.0],
+    ref:"Young (1995); Lloyd & Oliver (2012)" },
+  { normKey:"dj_contact", testKey:"drop_jump_contact_time",
+    label:"Drop Jump — Contact Time", unit:"ms",
+    why:"Elastic vs slow — shorter = more reactive (lower score = better)",
+    bands:[
+      {tier:"Elite",   range:"< 180 ms",  bg:"#0a2018",border:"#166534",text:"#166534"},
+      {tier:"Very Good",range:"180 – 220 ms",bg:"#0d2b1f",border:"#2d6a4f",text:"#2d6a4f"},
+      {tier:"Good",    range:"220 – 280 ms",bg:"#2a2208",border:"#d4a017",text:"#92400e"},
+      {tier:"Poor",    range:"> 280 ms",   bg:"#2a1010",border:"#e05252",text:"#e05252"},
+    ], bwRelative:false, breaks:[180,220,280], invertScale:true,
+    ref:"Young (1995)" },
+
+  // ── CMJ ──
+  { normKey:"cmj_height", testKey:"cmj_jump_height",
+    label:"CMJ — Jump Height", unit:"cm",
+    why:"Power output",
+    bands:[
+      {tier:"Poor",    range:"< 25 cm",   bg:"#2a1010",border:"#e05252",text:"#e05252"},
+      {tier:"Good",    range:"25 – 35 cm", bg:"#2a2208",border:"#d4a017",text:"#92400e"},
+      {tier:"Very Good",range:"35 – 45 cm",bg:"#0d2b1f",border:"#2d6a4f",text:"#2d6a4f"},
+      {tier:"Elite",   range:"> 45 cm",    bg:"#0a2018",border:"#166534",text:"#166534"},
+    ], bwRelative:false, breaks:[25,35,45],
+    ref:"Markovic et al. (2004)" },
+  { normKey:"cmj_power", testKey:"cmj_peak_power",
+    label:"CMJ — Peak Power", unit:"W",
+    why:"Underlying power engine",
+    bands:[
+      {tier:"Poor",    range:"< 2500 W",       bg:"#2a1010",border:"#e05252",text:"#e05252"},
+      {tier:"Good",    range:"2500 – 3500 W",  bg:"#2a2208",border:"#d4a017",text:"#92400e"},
+      {tier:"Very Good",range:"3500 – 4500 W", bg:"#0d2b1f",border:"#2d6a4f",text:"#2d6a4f"},
+      {tier:"Elite",   range:"> 4500 W",         bg:"#0a2018",border:"#166534",text:"#166534"},
+    ], bwRelative:false, breaks:[2500,3500,4500],
+    ref:"Cormie et al. (2011)" },
+
+  // ── SL Hop ──
+  { normKey:"slh_lsi", testKey:"slh_distance_lsi",
+    label:"Single Leg Hop — Distance (LSI %)", unit:"%",
+    why:"Performance symmetry — RTS threshold ≥90%",
+    bands:[
+      {tier:"Poor",    range:"< 70%",   bg:"#2a1010",border:"#e05252",text:"#e05252"},
+      {tier:"Good",    range:"70 – 85%",bg:"#2a2208",border:"#d4a017",text:"#92400e"},
+      {tier:"Very Good",range:"85 – 95%",bg:"#0d2b1f",border:"#2d6a4f",text:"#2d6a4f"},
+      {tier:"Elite",   range:"> 95%",    bg:"#0a2018",border:"#166534",text:"#166534"},
+    ], bwRelative:false, breaks:[70,85,95],
+    ref:"Noyes et al.; Barber et al. (1990)" },
+  { normKey:"slh_land", testKey:"slh_land_force",
+    label:"Single Leg Hop — Peak Landing Force", unit:"N",
+    why:"Injury risk indicator — high asymmetry = flag",
+    bands:[
+      {tier:"Poor",    range:"Asym > 15%", bg:"#2a1010",border:"#e05252",text:"#e05252"},
+      {tier:"Good",    range:"Asym 10–15%",bg:"#2a2208",border:"#d4a017",text:"#92400e"},
+      {tier:"Very Good",range:"Asym 5–10%",bg:"#0d2b1f",border:"#2d6a4f",text:"#2d6a4f"},
+      {tier:"Elite",   range:"Asym < 5%",  bg:"#0a2018",border:"#166534",text:"#166534"},
+    ], bwRelative:false, breaks:null, asymmetryBased:true,
+    ref:"Hewit et al. (2012)" },
+
+  // ── Nordic ──
+  { normKey:"nordic_peak", testKey:"nordic_peak_force",
+    label:"Nordic Curl — Peak Force", unit:"N",
+    why:"Absolute hamstring eccentric strength",
+    bands:[
+      {tier:"Poor",    range:"< 250 N",   bg:"#2a1010",border:"#e05252",text:"#e05252"},
+      {tier:"Good",    range:"250 – 350 N",bg:"#2a2208",border:"#d4a017",text:"#92400e"},
+      {tier:"Very Good",range:"350 – 450 N",bg:"#0d2b1f",border:"#2d6a4f",text:"#2d6a4f"},
+      {tier:"Elite",   range:"> 450 N",    bg:"#0a2018",border:"#166534",text:"#166534"},
+    ], bwRelative:false, breaks:[250,350,450],
+    ref:"Van Dyk et al.; Bourne et al. (2017)" },
+
+  // ── Hamstring ISO ──
+  { normKey:"ham_peak", testKey:"ham_iso_peak_force",
+    label:"Hamstring ISO (Prone) — Peak Force", unit:"N",
+    why:"Reliable rehab and readiness tracker",
+    bands:[
+      {tier:"Poor",    range:"< 150 N",         bg:"#2a1010",border:"#e05252",text:"#e05252"},
+      {tier:"Good",    range:"150 – 220 N",      bg:"#2a2208",border:"#d4a017",text:"#92400e"},
+      {tier:"Very Good",range:"220 – 300 N",      bg:"#0d2b1f",border:"#2d6a4f",text:"#2d6a4f"},
+      {tier:"Elite",   range:"> 300 N",            bg:"#0a2018",border:"#166534",text:"#166534"},
+    ], bwRelative:false, breaks:[150,220,300],
+    ref:"Shield et al.; Opar et al." },
+];
+
+function classifyBand(item, rawValue, bw) {
+  if (item.asymmetryBased) return null; // manual only
+  if (!rawValue && rawValue !== 0) return null;
+  const v = Number(rawValue);
+  if (!item.breaks) return null;
+  const score = item.bwRelative && bw ? v / bw : v;
+  if (item.invertScale) {
+    if (score < item.breaks[0]) return 0; // Elite
+    if (score < item.breaks[1]) return 1; // Very Good
+    if (score < item.breaks[2]) return 2; // Good
+    return 3; // Poor
+  }
+  if (score < item.breaks[0]) return 0;
+  if (score < item.breaks[1]) return 1;
+  if (score < item.breaks[2]) return 2;
+  return 3;
+}
+
+function NormativeTab({ bodyweight, testRows }) {
+  const [manualSelected, setManualSelected] = React.useState(() => normativeData.reduce((a, item) => { a[item.label] = null; return a; }, {}));
+
+  // Get latest value for each test to auto-classify
+  function getLatestValue(item) {
+    const key = item.testKey; // composite key like "imtp_peak_force"
+    const data = (testRows && testRows[key]) || [];
+    if (!data.length) return null;
+    const last = data[data.length - 1];
+    return last.value !== undefined ? last.value
+      : (last.l && last.r ? (last.l + last.r) / 2 : (last.l || last.r));
+  }
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 10, marginBottom: 4 }}>
+        <div style={{ fontSize: 13, color: C.muted }}>
+          Bands auto-highlight from testing data. Click any band to override manually.
+        </div>
+        {bodyweight ? (
+          <div style={{ fontSize: 12, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 7, padding: "5px 14px", color: C.heading }}>
+            BW: <strong>{bodyweight} kg</strong>
+          </div>
+        ) : (
+          <div style={{ fontSize: 12, color: C.red }}>⚠ Enter bodyweight in Tab 2 for relative scores</div>
+        )}
+      </div>
+
+      {normativeData.map((item, i) => {
+        const latestVal = getLatestValue(item);
+        const autoBand = classifyBand(item, latestVal, bodyweight);
+        const activeBand = manualSelected[item.label] !== null ? manualSelected[item.label] : autoBand;
+
+        return (
+          <Card key={i}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: C.heading }}>{item.label}</div>
+                <div style={{ fontSize: 11, color: C.muted, marginTop: 2 }}>{item.unit}</div>
+                {item.why && <div style={{ fontSize: 11, color: C.accentLight, marginTop: 3, fontStyle: "italic" }}>Why: {item.why}</div>}
+              </div>
+              {latestVal && (
+                <div style={{ fontSize: 12, color: C.muted, background: C.surface, borderRadius: 6, padding: "4px 10px", border: `1px solid ${C.border}` }}>
+                  Latest: <span style={{ color: C.heading, fontWeight: 700 }}>{Number(latestVal).toFixed(1)}</span>
+                  {false && (
+                    <span style={{ color: C.accent, marginLeft: 6, fontWeight: 700 }}>→ {(Number(latestVal)/bodyweight).toFixed(2)} relative</span>
+                  )}
+                </div>
+              )}
+            </div>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              {item.bands.map((b, j) => {
+                const isActive = activeBand === j;
+                const isAuto = autoBand === j && manualSelected[item.label] === null;
+                return (
+                  <div key={j}
+                    onClick={() => setManualSelected(prev => ({ ...prev, [item.label]: prev[item.label] === j ? null : j }))}
+                    style={{
+                      flex: "1 1 110px", background: b.bg,
+                      border: `1px solid ${b.border}`,
+                      borderTop: `3px solid ${b.border}`,
+                      borderRadius: 8, padding: "12px 14px",
+                      cursor: "pointer",
+                      boxShadow: isActive ? `0 0 0 2px ${b.border}` : "none",
+                      transition: "box-shadow 0.15s",
+                      position: "relative"
+                    }}>
+                    {isAuto && <div style={{ position: "absolute", top: 6, right: 6, fontSize: 8, color: b.text, fontWeight: 800, letterSpacing: "0.08em" }}>AUTO</div>}
+                    <div style={{ fontSize: 10, fontWeight: 800, color: b.text, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 5 }}>{b.tier}</div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: C.heading }}>{b.range}</div>
+                    <div style={{ marginTop: 10, textAlign: "center", height: 20 }}>
+                      {isActive && (
+                        <div style={{ display: "inline-block" }}>
+                          <div style={{ width: 0, height: 0, borderLeft: "7px solid transparent", borderRight: "7px solid transparent", borderBottom: `10px solid ${b.border}`, margin: "0 auto" }} />
+                          <div style={{ fontSize: 9, color: b.text, fontWeight: 800, marginTop: 2, letterSpacing: "0.08em" }}>{isAuto ? "CURRENT" : "MARKED"}</div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{ fontSize: 10, color: C.muted, marginTop: 10, fontStyle: "italic" }}>Ref: {item.ref}</div>
+          </Card>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── ROOT ─────────────────────────────────────────────────────────────────────
+const TABS = [
+  { id: "cover",     label: "Cover",    short: "Home",    icon: "⊹"  },
+  { id: "exercises", label: "Program",  short: "Program", icon: "📋" },
+  { id: "testing",   label: "Testing",  short: "Testing", icon: "📊" },
+  { id: "norms",     label: "Normative",short: "Norms",   icon: "🎯" },
+];
+
+const DEFAULT_TEST_ROWS = testTypes.reduce((a, t) => {
+  t.measures.forEach(m => { a[t.key + "_" + m.key] = []; });
+  return a;
+}, {});
+
+function App() {
+  const [active, setActive] = React.useState("cover");
+  const [patient, setPatient] = usePersist("method_patient", "Patient Name");
+  const [clinician, setClinician] = usePersist("method_clinician", "Clinician Name");
+  const [bodyweight, setBodyweight] = usePersist("method_bw", null);
+  const [bwHistory, setBwHistory] = usePersist("method_bw_history", []);
+  const [_testRows, _setTestRows] = usePersist("method_test_rows", DEFAULT_TEST_ROWS);
+  const testRows = { ...DEFAULT_TEST_ROWS, ...(_testRows || {}) };
+  function setTestRows(updater) {
+    _setTestRows(typeof updater === "function"
+      ? prev => ({ ...DEFAULT_TEST_ROWS, ...updater({ ...DEFAULT_TEST_ROWS, ...(prev||{}) }) })
+      : { ...DEFAULT_TEST_ROWS, ...updater });
+  }
+  const [weeks, setWeeks] = usePersist("method_weeks", [
+  {"label":"Week 1","sub":"Foundation","notes":"","sections":[
+      {"id":1,"label":"Neural Prep / Warm-Up","open":false,"exercises":[
+        {"id":101,"name":"Ankle dorsiflexion rocks","sets":"2","reps":"10","weight":"","ytLink":"https://www.youtube.com/results?search_query=ankle+dorsiflexion+rocks"},
+        {"id":102,"name":"1st MTP controlled extension (pain-free)","sets":"2","reps":"8","weight":"","ytLink":"https://www.youtube.com/results?search_query=first+MTP+extension+mobility"},
+        {"id":103,"name":"Short foot holds","sets":"3","reps":"20s","weight":"","ytLink":"https://www.youtube.com/results?search_query=short+foot+exercise"},
+        {"id":104,"name":"Tibialis raises","sets":"2","reps":"15","weight":"","ytLink":"https://www.youtube.com/results?search_query=tibialis+anterior+raise"},
+        {"id":105,"name":"Glute bridge","sets":"2","reps":"12","weight":"","ytLink":"https://www.youtube.com/results?search_query=glute+bridge"}
+      ]},
+      {"id":2,"label":"Block 1 – Squat","open":false,"exercises":[
+        {"id":201,"name":"Heel-elevated squat","sets":"4","reps":"6 (RPE 6–7)","weight":"","ytLink":"https://www.youtube.com/results?search_query=heel+elevated+squat"},
+        {"id":202,"name":"Split squat ISO (midfoot loading)","sets":"3","reps":"30s","weight":"","ytLink":"https://www.youtube.com/results?search_query=split+squat+isometric"}
+      ]},
+      {"id":3,"label":"Block 2 – Unilateral Lower Limb","open":false,"exercises":[
+        {"id":301,"name":"Step-ups","sets":"3","reps":"8 each leg","weight":"","ytLink":"https://www.youtube.com/results?search_query=step+ups+exercise"},
+        {"id":302,"name":"Double-leg calf raise ISO (flat foot)","sets":"3","reps":"30s","weight":"","ytLink":"https://www.youtube.com/results?search_query=calf+raise+isometric"}
+      ]},
+      {"id":4,"label":"Block 3 – Posterior Chain + Calf","open":false,"exercises":[
+        {"id":401,"name":"RDL","sets":"3","reps":"8","weight":"","ytLink":"https://www.youtube.com/results?search_query=romanian+deadlift"},
+        {"id":402,"name":"Seated calf raise","sets":"4","reps":"8","weight":"","ytLink":"https://www.youtube.com/results?search_query=seated+calf+raise"},
+        {"id":403,"name":"Standing calf ISO (flat foot)","sets":"3","reps":"30s","weight":"","ytLink":"https://www.youtube.com/results?search_query=standing+calf+isometric"}
+      ]}
+    ]},
+  {"label":"Week 2","sub":"Forefoot","notes":"","sections":[
+      {"id":10,"label":"Neural Prep / Warm-Up","open":false,"exercises":[
+        {"id":1001,"name":"Ankle dorsiflexion rocks","sets":"2","reps":"10","weight":"","ytLink":"https://www.youtube.com/results?search_query=ankle+dorsiflexion+rocks"},
+        {"id":1002,"name":"1st MTP controlled extension","sets":"2","reps":"8","weight":"","ytLink":"https://www.youtube.com/results?search_query=first+MTP+extension+mobility"},
+        {"id":1003,"name":"Short foot holds","sets":"3","reps":"20s","weight":"","ytLink":"https://www.youtube.com/results?search_query=short+foot+exercise"},
+        {"id":1004,"name":"Tibialis raises","sets":"2","reps":"15","weight":"","ytLink":"https://www.youtube.com/results?search_query=tibialis+anterior+raise"},
+        {"id":1005,"name":"Glute bridge","sets":"2","reps":"12","weight":"","ytLink":"https://www.youtube.com/results?search_query=glute+bridge"}
+      ]},
+      {"id":11,"label":"Block 1 – Squat","open":false,"exercises":[
+        {"id":1101,"name":"Trap bar deadlift","sets":"4","reps":"5 (RPE 7–7.5)","weight":"","ytLink":"https://www.youtube.com/results?search_query=trap+bar+deadlift"},
+        {"id":1102,"name":"Split squat ISO (slight forefoot bias)","sets":"3","reps":"35s","weight":"","ytLink":"https://www.youtube.com/results?search_query=split+squat+isometric"}
+      ]},
+      {"id":12,"label":"Block 2 – Unilateral Lower Limb","open":false,"exercises":[
+        {"id":1201,"name":"RFESS short stride","sets":"3","reps":"8 each","weight":"","ytLink":"https://www.youtube.com/results?search_query=RFESS+rear+foot+elevated+split+squat"},
+        {"id":1202,"name":"Double-leg calf ISO (forefoot evenly loaded)","sets":"3","reps":"35s","weight":"","ytLink":"https://www.youtube.com/results?search_query=calf+raise+isometric"}
+      ]},
+      {"id":13,"label":"Block 3 – Posterior Chain + Calf","open":false,"exercises":[
+        {"id":1301,"name":"Hip thrust","sets":"3","reps":"8","weight":"","ytLink":"https://www.youtube.com/results?search_query=hip+thrust"},
+        {"id":1302,"name":"Seated calf raise (heavier)","sets":"4","reps":"6–8","weight":"","ytLink":"https://www.youtube.com/results?search_query=seated+calf+raise"},
+        {"id":1303,"name":"Standing calf raises (controlled tempo)","sets":"3","reps":"10","weight":"","ytLink":"https://www.youtube.com/results?search_query=standing+calf+raise+slow+tempo"}
+      ]}
+    ]},
+  {"label":"Week 3","sub":"Big Toe Load","notes":"","sections":[
+      {"id":20,"label":"Neural Prep / Warm-Up","open":false,"exercises":[
+        {"id":2001,"name":"Ankle dorsiflexion rocks","sets":"2","reps":"10","weight":"","ytLink":"https://www.youtube.com/results?search_query=ankle+dorsiflexion+rocks"},
+        {"id":2002,"name":"Short foot + big toe press","sets":"3","reps":"20s","weight":"","ytLink":"https://www.youtube.com/results?search_query=short+foot+big+toe+press"},
+        {"id":2003,"name":"Tibialis raises","sets":"2","reps":"15","weight":"","ytLink":"https://www.youtube.com/results?search_query=tibialis+anterior+raise"}
+      ]},
+      {"id":21,"label":"Block 1 – Squat","open":false,"exercises":[
+        {"id":2101,"name":"Trap bar deadlift","sets":"4","reps":"4 (RPE 7.5–8)","weight":"","ytLink":"https://www.youtube.com/results?search_query=trap+bar+deadlift"},
+        {"id":2102,"name":"Split squat ISO (big toe pressure emphasis)","sets":"3","reps":"40s","weight":"","ytLink":"https://www.youtube.com/results?search_query=split+squat+isometric"}
+      ]},
+      {"id":22,"label":"Block 2 – Unilateral Lower Limb","open":false,"exercises":[
+        {"id":2201,"name":"RFESS","sets":"4","reps":"6","weight":"","ytLink":"https://www.youtube.com/results?search_query=RFESS+rear+foot+elevated+split+squat"},
+        {"id":2202,"name":"Single-leg calf ISO (mid-range)","sets":"3","reps":"30s","weight":"","ytLink":"https://www.youtube.com/results?search_query=single+leg+calf+isometric"}
+      ]},
+      {"id":23,"label":"Block 3 – Posterior Chain + Calf","open":false,"exercises":[
+        {"id":2301,"name":"RDL (heavier)","sets":"4","reps":"6","weight":"","ytLink":"https://www.youtube.com/results?search_query=romanian+deadlift"},
+        {"id":2302,"name":"Seated calf raise","sets":"4","reps":"6","weight":"","ytLink":"https://www.youtube.com/results?search_query=seated+calf+raise"},
+        {"id":2303,"name":"Single-leg calf raises (partial ROM, controlled)","sets":"3","reps":"8","weight":"","ytLink":"https://www.youtube.com/results?search_query=single+leg+calf+raise"}
+      ]}
+    ]},
+  {"label":"Week 4","sub":"Peak","notes":"","sections":[
+      {"id":30,"label":"Neural Prep / Warm-Up","open":false,"exercises":[
+        {"id":3001,"name":"Ankle dorsiflexion rocks","sets":"2","reps":"10","weight":"","ytLink":"https://www.youtube.com/results?search_query=ankle+dorsiflexion+rocks"},
+        {"id":3002,"name":"Short foot + big toe press","sets":"3","reps":"20s","weight":"","ytLink":"https://www.youtube.com/results?search_query=short+foot+big+toe+press"},
+        {"id":3003,"name":"Tibialis raises","sets":"2","reps":"15","weight":"","ytLink":"https://www.youtube.com/results?search_query=tibialis+anterior+raise"}
+      ]},
+      {"id":31,"label":"Block 1 – Squat","open":false,"exercises":[
+        {"id":3101,"name":"Trap bar deadlift","sets":"4","reps":"3 (RPE 8–8.5)","weight":"","ytLink":"https://www.youtube.com/results?search_query=trap+bar+deadlift"},
+        {"id":3102,"name":"Split squat ISO (loaded, big toe bias)","sets":"3","reps":"45s","weight":"","ytLink":"https://www.youtube.com/results?search_query=split+squat+isometric"}
+      ]},
+      {"id":32,"label":"Block 2 – Unilateral Lower Limb","open":false,"exercises":[
+        {"id":3201,"name":"RFESS","sets":"4","reps":"5","weight":"","ytLink":"https://www.youtube.com/results?search_query=RFESS+rear+foot+elevated+split+squat"},
+        {"id":3202,"name":"Single-leg calf ISO (towards end range)","sets":"3","reps":"40s","weight":"","ytLink":"https://www.youtube.com/results?search_query=single+leg+calf+isometric"}
+      ]},
+      {"id":33,"label":"Block 3 – Posterior Chain + Calf","open":false,"exercises":[
+        {"id":3301,"name":"Hip thrust (heavy)","sets":"4","reps":"6","weight":"","ytLink":"https://www.youtube.com/results?search_query=hip+thrust"},
+        {"id":3302,"name":"Seated calf raise (heavy)","sets":"4","reps":"5–6","weight":"","ytLink":"https://www.youtube.com/results?search_query=seated+calf+raise"},
+        {"id":3303,"name":"Single-leg calf raises (full ROM, big toe push-off)","sets":"3","reps":"10","weight":"","ytLink":"https://www.youtube.com/results?search_query=single+leg+calf+raise"}
+      ]}
+    ]}
+]);
+
+
+  return (
+    <div style={{ minHeight: "100vh", background: C.bg, color: C.text, fontFamily: "'DM Sans', 'Segoe UI', sans-serif" }}>
+
+      {/* Top header bar */}
+      <div style={{
+        background: "#000000", padding: "0 16px",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        position: "sticky", top: 0, zIndex: 10, height: 52,
+        borderBottom: `2px solid ${C.accent}`
+      }}>
+        <span style={{ fontSize: 15, fontWeight: 900, color: "white", letterSpacing: "0.06em" }}>Method.</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ fontSize: 11, color: C.muted }}>{TABS.find(t => t.id === active)?.label}</span>
+          <span style={{ fontSize: 9, color: C.accent, fontWeight: 700, background: C.accentBg, borderRadius: 10, padding: "2px 7px" }}>● Saved</span>
+        </div>
+      </div>
+
+      {/* Page content — bottom-padded to clear the fixed nav */}
+      <div style={{ maxWidth: 680, margin: "0 auto", padding: "20px 14px 90px" }}>
+        {active === "cover" && <CoverPage company="Method." patient={patient} setPatient={setPatient} clinician={clinician} setClinician={setClinician} />}
+        {active === "exercises" && <ExercisesTab weeks={weeks} setWeeks={setWeeks} />}
+        {active === "testing" && <TestingTab bodyweight={bodyweight} setBodyweight={setBodyweight} bwHistory={bwHistory} setBwHistory={setBwHistory} rows={testRows} setRows={setTestRows} />}
+        {active === "norms" && <NormativeTab bodyweight={bodyweight} testRows={testRows} />}
+      </div>
+
+      {/* Bottom tab bar — mobile-style */}
+      <div style={{
+        position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 20,
+        background: "#0a0a0a", borderTop: `1px solid ${C.border}`,
+        display: "flex", alignItems: "stretch",
+        paddingBottom: "env(safe-area-inset-bottom, 0px)"
+      }}>
+        {TABS.map(t => {
+          const isActive = active === t.id;
+          return (
+            <button key={t.id} onClick={() => setActive(t.id)}
+              style={{
+                flex: 1, background: "transparent", border: "none",
+                color: isActive ? C.accent : C.muted,
+                padding: "10px 4px 8px", cursor: "pointer",
+                display: "flex", flexDirection: "column", alignItems: "center", gap: 3
+              }}>
+              <div style={{ fontSize: 18 }}>{t.icon}</div>
+              <div style={{ fontSize: 9, fontWeight: isActive ? 800 : 500, letterSpacing: "0.04em", textTransform: "uppercase" }}>{t.short}</div>
+              {isActive && <div style={{ width: 18, height: 2, background: C.accent, borderRadius: 1 }} />}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+    const domNode = document.getElementById("root");
+    const appRoot = ReactDOM.createRoot(domNode);
+    appRoot.render(React.createElement(App));
+    const loader = document.getElementById("loader");
+    if(loader) loader.style.display="none";
+  </script>
+</body>
+</html>
